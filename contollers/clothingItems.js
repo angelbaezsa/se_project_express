@@ -1,4 +1,3 @@
-const clothingItems = require("../models/clothingItems");
 const clothingItem = require("../models/clothingItems");
 
 const createItem = (req, res) => {
@@ -12,7 +11,7 @@ const createItem = (req, res) => {
     .then((response) => {
       console.log(response);
       res.send({ data: response });
-      res.status(200);
+      res.status(201);
     })
     .catch((error) => {
       console.log(`Error while adding item${error}`);
@@ -26,6 +25,7 @@ const getItems = (req, res, next) => {
     .then((response) => {
       console.log(response);
       res.send(response);
+      res.status(202);
     })
     .catch((error) => {
       console.log(`Error while getting item${error}`);
@@ -34,15 +34,15 @@ const getItems = (req, res, next) => {
 };
 
 const deleteItem = (req, res, next) => {
-  const { id } = req.params;
-  clothingItems
-    .findByIdAndDelete({ _id: id })
+  const { itemId } = req.params;
+  clothingItem
+    .findByIdAndDelete(itemId)
     .then((response) => {
       res.send(response);
       res.status(204);
     })
     .catch((error) => {
-      console.log(`Error while getting item${error}`);
+      console.log(`Error deleting item${error}`);
       res.status(500);
     });
 };
