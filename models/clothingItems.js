@@ -22,19 +22,19 @@ const clothingItemsSchema = new mongoose.Schema({
       message: "Invalid image URL",
     },
   },
-  // owner: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "user",
-  //   required: true,
-  // },
-  // likes: {
-  //   type: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-  //   default: [],
-  // },
-  // createdAt: {
-  //   type: Date,
-  //   default: Date.now,
-  // },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
+  },
+  likes: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    default: [],
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("clothingItem", clothingItemsSchema);
