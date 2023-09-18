@@ -15,8 +15,8 @@ const createItem = (req, res, next) => {
       res.status(201);
     })
     .catch((error) => {
-      if (error.name === INVALID_DATA.error) {
-        res.status(INVALID_DATA.status).send({ message: INVALID_DATA.error });
+      if (error.name === "ValidationError") {
+        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else {
         next(error);
       }
@@ -42,14 +42,19 @@ const deleteItem = (req, res, next) => {
   clothingItem
     .findByIdAndDelete(itemId)
     .then((response) => {
-      res.send(response);
-      res.status(204);
+      if (response !== null) {
+        res.status(200).send({ data: response });
+      } else {
+        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+      }
     })
     .catch((error) => {
-      if (error.name === NOTFOUND.error) {
-        res.status(NOTFOUND.status).send({ message: NOTFOUND.error });
+      if (error.name === "ValidationError") {
+        res.status(INVALID_DATA.status).send({ message: INVALID_DATA.error });
+      } else if (error.name === "NotFoundError") {
+        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else {
-        next(error);
+        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       }
     });
 };
@@ -67,13 +72,16 @@ const likeItem = (req, res, next) => {
       if (response !== null) {
         res.status(200).send({ data: response });
       } else {
-        console.log(DEFAULT.status);
-        res.send(DEFAULT.error);
+        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       }
     })
     .catch((error) => {
-      if (error) {
-        res.status(DEFAULT.status).send(DEFAULT.error);
+      if (error.name === "ValidationError") {
+        res.status(INVALID_DATA.status).send({ message: INVALID_DATA.error });
+      } else if (error.name === "NotFoundError") {
+        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+      } else {
+        res.status(400).send({ message: NOTFOUND.status });
       }
     });
 };
@@ -89,19 +97,31 @@ const disLikeItem = (req, res, next) => {
     )
     .then((item) => {
       if (!item) {
-        res.status(NOTFOUND.error).send(NOTFOUND.status);
+        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else {
         res.status(200).send({ data: item });
       }
     })
     .catch((error) => {
-      if (error.name === INVALID_DATA.error) {
-        res.status(INVALID_DATA.error).send(INVALID_DATA.status);
+      if (error.name === "ValidationError") {
+        res.status(INVALID_DATA.status).send({ message: INVALID_DATA.error });
+      } else if (error.name === "NotFoundError") {
+        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else {
-        res.status(DEFAULT.error).send(DEFAULT.status);
+        res.status(400).send({ message: NOTFOUND.status });
       }
     });
 };
+
+// .catch((e) => {
+//   if (e.name === "ValidationError") {
+//     res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+//   } else if (e.name === "NotFoundError") {
+//     res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+//   } else {
+//     res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+//   }
+// });
 
 module.exports = {
   createItem,
