@@ -95,8 +95,6 @@ const disLikeItem = (req, res, next) => {
     .catch((error) => {
       if (error.name === "CastError") {
         res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
-      } else if (error.name === "NotFoundError") {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else {
         res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
