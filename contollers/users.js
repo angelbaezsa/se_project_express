@@ -7,7 +7,7 @@ const createUser = (req, res, next) => {
   user
     .create({ name, avatar })
     .then((response) => {
-      console.log(response);
+      // console.log(response);
       res.status(201);
       res.send(response);
     })
@@ -15,7 +15,7 @@ const createUser = (req, res, next) => {
       if (error.name === "ValidationError") {
         res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else {
-        next(error);
+        res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
     });
 };
@@ -26,10 +26,12 @@ const getUsers = (req, res) => {
     .then((response) => {
       res.status(200);
       res.send(response);
-      console.log(response);
+      // console.log(response);
     })
-    .catch((error) => {
-      res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+    .catch(() => {
+      // console.error(error);
+      // res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+      res.status(DEFAULT.error).send({ message: DEFAULT.status });
     });
 };
 
@@ -45,12 +47,10 @@ const getUserById = (req, res, next) => {
       }
     })
     .catch((e) => {
-      if (e.name === "ValidationError") {
+      if (e.name === "CastError") {
         res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
-      } else if (e.name === "NotFoundError") {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
     });
 };
@@ -67,7 +67,7 @@ const deleteUser = (req, res, next) => {
       if (error.name === "ValidationError") {
         res.status(DEFAULT.error).send({ message: DEFAULT.status });
       } else {
-        next(error);
+        res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
     });
 };

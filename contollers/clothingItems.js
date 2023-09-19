@@ -2,23 +2,19 @@ const clothingItem = require("../models/clothingItems");
 const { INVALID_DATA, NOTFOUND, DEFAULT } = require("../utils/errors");
 
 const createItem = (req, res, next) => {
-  console.log(req);
-  console.log(req.body);
-
   const { name, weather, imageUrl } = req.body;
 
   clothingItem
     .create({ name, weather, imageUrl, owner: req.user._id })
     .then((response) => {
-      console.log(response);
-      res.send({ data: response });
-      res.status(201);
+      // console.log(response);
+      res.status(201).send({ data: response });
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
         res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else {
-        next(error);
+        res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
     });
 };
@@ -27,13 +23,11 @@ const getItems = (req, res, next) => {
   clothingItem
     .find({})
     .then((response) => {
-      res.send(response);
-      res.status(202);
+      res.status(200).send(response);
     })
-    .catch((error) => {
-      console.log(`Error while getting item${error}`);
-      res.status(500);
-      next(error);
+    .catch(() => {
+      // console.log(error);
+      res.status(DEFAULT.error).send({ message: DEFAULT.status });
     });
 };
 
@@ -49,12 +43,10 @@ const deleteItem = (req, res, next) => {
       }
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
-        res.status(INVALID_DATA.status).send({ message: INVALID_DATA.error });
-      } else if (error.name === "NotFoundError") {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
-      } else {
+      if (error.name === "CastError") {
         res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+      } else {
+        res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
     });
 };
@@ -76,12 +68,10 @@ const likeItem = (req, res, next) => {
       }
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
-        res.status(INVALID_DATA.status).send({ message: INVALID_DATA.error });
-      } else if (error.name === "NotFoundError") {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+      if (error.name === "CastError") {
+        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else {
-        res.status(400).send({ message: NOTFOUND.status });
+        res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
     });
 };
@@ -103,12 +93,12 @@ const disLikeItem = (req, res, next) => {
       }
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
-        res.status(INVALID_DATA.status).send({ message: INVALID_DATA.error });
+      if (error.name === "CastError") {
+        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else if (error.name === "NotFoundError") {
         res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else {
-        res.status(400).send({ message: NOTFOUND.status });
+        res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
     });
 };
