@@ -1,5 +1,6 @@
 # WTWR (What to Wear?): Back End
-The back-end project is focused on creating a server for the WTWR application. 
+The back-end project is focused on creating a server for the WTWR application. It stores the clothing items used to in the main and user display. 
+It also stores the user information that is displayed in the home or profile page, avatar and the user name.
 # Express RESTful API README
 
 Welcome se_project_express RESTful API server that enables CRUD (Create, Read, Update, Delete) operations through its endpoints. This API is designed to serve as a robust foundation for building and managing resources. Whether you're developing a web or mobile application, this RESTful API can efficiently handle your data.
