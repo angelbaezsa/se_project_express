@@ -12,7 +12,7 @@ The server should now be up and running locally on port 3001.
 
 This Express RESTful API provides a set of endpoints that adhere to RESTful principles for CRUD operations:
 
-- **Create**: `POST /api/resources`
+- **Create**: `POST /api/items||users`
   - Create a new resource. Send a JSON object in the request body with the data you want to create.
 
 - **Read (All)**: `GET /api/resources`
