@@ -17,6 +17,22 @@ const usersSchema = new mongoose.Schema({
       message: "Invalid avatar URL",
     },
   },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator(value) {
+        return validator.isEmail(value);
+      },
+      message: "Invalid email",
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
+  },
 });
 
 module.exports = mongoose.model("user", usersSchema);
