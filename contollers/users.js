@@ -3,29 +3,32 @@ const jwt = require("jsonwebtoken");
 const user = require("../models/users");
 const { INVALID_DATA, NOTFOUND, DEFAULT } = require("../utils/errors");
 
-const { NODDE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   return bcrypt
     .hash(password, 10)
-    .then((hashedPassword) => {
-      user
-        .create({ name, avatar, email, password: hashedPassword })
-        .then((response) => {
-          if (response) {
-            const userObject = response.toObject();
-            delete userObject.password;
-            res.status(201).send(userObject);
-          }
-        });
+    .then((hashedPassword) =>
+      user.create({ name, avatar, email, password: hashedPassword }),
+    )
+    .then((response) => {
+      if (response) {
+        const userObject = response.toObject();
+        delete userObject.password;
+        res.status(201).send(userObject);
+      }
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
         res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else if (error.code === 11000) {
-        res.status(11000).send({ message: "Email already in use" });
+        res
+          .status(409)
+          .send({ message: "Invalid email: Email already in use" });
+      } else if (error.code === INVALID_DATA.error) {
+        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else {
         res.status(DEFAULT.error).send({ message: DEFAULT.status });
       }
@@ -40,27 +43,30 @@ const login = (req, res, next) => {
     .select("+password")
     .then((userObject) => {
       if (!userObject) {
-        res.status(401).send({ message: "Unauthorized" });
+        return res.status(401).send({ message: "Unauthorized" });
       }
-      return bcrypt
-        .compare(password, userObject.password)
-        .then((matchPassword) => {
-          if (!matchPassword) {
+      return (
+        bcrypt
+          .compare(password, userObject.password)
+          // eslint-disable-next-line consistent-return
+          .then((matchPassword) => {
+            if (!matchPassword) {
+              return res.status(401).send({ message: "Unauthorized" });
+            }
+            res.send({
+              token: jwt.sign(
+                { _id: userObject._id },
+                NODE_ENV === "production" ? JWT_SECRET : "dev-secret",
+                {
+                  expiresIn: "7d",
+                },
+              ),
+            });
+          })
+          .catch(() => {
             res.status(401).send({ message: "Unauthorized" });
-          }
-          res.send({
-            token: jwt.sign(
-              { _id: userObject._id },
-              NODDE_ENV === "production" ? JWT_SECRET : "dev-secret",
-              {
-                expiresIn: "7d",
-              },
-            ),
-          });
-        })
-        .catch(() => {
-          res.status(401).send({ message: "Unauthorized" });
-        });
+          })
+      );
     });
 };
 
@@ -80,14 +86,15 @@ const getUsers = (req, res) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  const { userId } = req.user._id;
+  // const { userId } = req.user._id;
+  console.log("Get current user got to run");
   user
-    .findById(userId)
+    .findById(req.user._id)
     .then((response) => {
-      if (response !== null) {
-        res.status(200).send({ response });
-      } else {
+      if (!response) {
         res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+      } else {
+        res.status(200).send({ response });
       }
     })
     .catch((e) => {

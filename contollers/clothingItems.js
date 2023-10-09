@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const clothingItem = require("../models/clothingItems");
 const { INVALID_DATA, NOTFOUND, DEFAULT } = require("../utils/errors");
 
@@ -33,13 +34,16 @@ const getItems = (req, res, next) => {
 
 const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
+
   clothingItem
     .findByIdAndDelete(itemId)
     .then((response) => {
-      if (response !== null) {
-        res.status(200).send({ data: response });
-      } else {
+      if (!response) {
         res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+      } else if (String(response.owner) !== req.user._id) {
+        return res.status(403).send({ Message: "Unauthorized" });
+      } else {
+        res.status(200).send({ data: response });
       }
     })
     .catch((error) => {
@@ -100,16 +104,6 @@ const disLikeItem = (req, res, next) => {
       }
     });
 };
-
-// .catch((e) => {
-//   if (e.name === "ValidationError") {
-//     res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
-//   } else if (e.name === "NotFoundError") {
-//     res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
-//   } else {
-//     res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
-//   }
-// });
 
 module.exports = {
   createItem,
