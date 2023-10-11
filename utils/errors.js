@@ -1,11 +1,24 @@
+const SUCCESSFUL = {
+  status: "Done!",
+};
 const INVALID_DATA = {
   status: "BadRequest",
   error: 400,
 };
 
+const UNAUTHORIZED = {
+  status: "Unauthorized",
+  error: 401,
+};
+
 const NOTFOUND = {
   status: "NotFound",
   error: 404,
+};
+
+const DUPLICATED = {
+  status: "Email already in use",
+  error: 409,
 };
 
 const DEFAULT = {
@@ -17,4 +30,7 @@ module.exports = {
   INVALID_DATA,
   NOTFOUND,
   DEFAULT,
+  UNAUTHORIZED,
+  SUCCESSFUL,
+  DUPLICATED,
 };

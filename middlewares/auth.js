@@ -1,22 +1,26 @@
-/* eslint-disable consistent-return */
 const jwt = require("jsonwebtoken");
+const { UNAUTHORIZED } = require("../utils/errors");
 
-const { JWT_SECRET } = process.env;
+// const { JWT_SECRET } = process.env;
 
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    return res.status(401).send({ message: "Issue with header" });
+    return res
+      .status(UNAUTHORIZED.error)
+      .send({ message: UNAUTHORIZED.status });
   }
 
   const token = authorization.replace("Bearer ", "");
   let payload;
 
   try {
-    payload = jwt.verify(token, JWT_SECRET);
+    payload = jwt.verify(token, "dev-secret");
   } catch (err) {
-    return res.status(401).send({ message: "couldn't retrieve JWT" });
+    return res
+      .status(UNAUTHORIZED.error)
+      .send({ message: UNAUTHORIZED.status });
   }
   req.user = payload;
   next();

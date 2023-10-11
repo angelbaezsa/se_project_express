@@ -1,6 +1,11 @@
-/* eslint-disable consistent-return */
+const clothingItems = require("../models/clothingItems");
 const clothingItem = require("../models/clothingItems");
-const { INVALID_DATA, NOTFOUND, DEFAULT } = require("../utils/errors");
+const {
+  INVALID_DATA,
+  NOTFOUND,
+  DEFAULT,
+  UNAUTHORIZED,
+} = require("../utils/errors");
 
 const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
@@ -24,7 +29,8 @@ const getItems = (req, res, next) => {
   clothingItem
     .find({})
     .then((response) => {
-      res.status(200).send(response);
+      // res.status(200).send(response);
+      res.send({ response });
     })
     .catch(() => {
       // console.log(error);
@@ -36,14 +42,16 @@ const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   clothingItem
-    .findByIdAndDelete(itemId)
+    .findOne({ _id: itemId })
     .then((response) => {
       if (!response) {
         res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else if (String(response.owner) !== req.user._id) {
-        return res.status(403).send({ Message: "Unauthorized" });
+        return res.status(403).send({ Message: UNAUTHORIZED.status });
       } else {
-        res.status(200).send({ data: response });
+        return clothingItems
+          .deleteOne({ _id: itemId })
+          .then((resp) => res.send({ resp }));
       }
     })
     .catch((error) => {
