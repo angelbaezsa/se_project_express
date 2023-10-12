@@ -7,9 +7,7 @@ const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    return res
-      .status(UNAUTHORIZED.error)
-      .send({ message: UNAUTHORIZED.status });
+    res.status(UNAUTHORIZED.error).send({ message: UNAUTHORIZED.status });
   }
 
   const token = authorization.replace("Bearer ", "");
@@ -18,9 +16,7 @@ const auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, "dev-secret");
   } catch (err) {
-    return res
-      .status(UNAUTHORIZED.error)
-      .send({ message: UNAUTHORIZED.status });
+    res.status(UNAUTHORIZED.error).send({ message: UNAUTHORIZED.status });
   }
   req.user = payload;
   next();

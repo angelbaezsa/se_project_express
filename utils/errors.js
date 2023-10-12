@@ -11,6 +11,11 @@ const UNAUTHORIZED = {
   error: 401,
 };
 
+const FORBIDDEN = {
+  status: "Forbidden",
+  error: 403,
+};
+
 const NOTFOUND = {
   status: "NotFound",
   error: 404,
@@ -33,4 +38,5 @@ module.exports = {
   UNAUTHORIZED,
   SUCCESSFUL,
   DUPLICATED,
+  FORBIDDEN,
 };

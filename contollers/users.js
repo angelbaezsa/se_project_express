@@ -60,7 +60,7 @@ const login = (req, res, next) => {
               .status(UNAUTHORIZED.error)
               .send({ message: UNAUTHORIZED.status });
           }
-          res.send({
+          return res.send({
             token: jwt.sign(
               { _id: userObject._id },
               NODE_ENV === "production" ? JWT_SECRET : "dev-secret",

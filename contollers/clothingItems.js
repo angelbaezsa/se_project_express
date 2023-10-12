@@ -4,7 +4,7 @@ const {
   INVALID_DATA,
   NOTFOUND,
   DEFAULT,
-  UNAUTHORIZED,
+  FORBIDDEN,
 } = require("../utils/errors");
 
 const createItem = (req, res, next) => {
@@ -47,9 +47,9 @@ const deleteItem = (req, res, next) => {
       if (!response) {
         res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else if (String(response.owner) !== req.user._id) {
-        return res.status(403).send({ Message: UNAUTHORIZED.status });
+        res.status(FORBIDDEN.error).send({ Message: FORBIDDEN.status });
       } else {
-        return clothingItems
+        clothingItems
           .deleteOne({ _id: itemId })
           .then((resp) => res.send({ resp }));
       }
