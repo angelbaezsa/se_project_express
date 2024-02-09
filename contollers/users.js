@@ -1,13 +1,19 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const user = require("../models/users");
-const {
-  INVALID_DATA,
-  NOTFOUND,
-  DEFAULT,
-  DUPLICATED,
-  UNAUTHORIZED,
-} = require("../utils/errors");
+// const {
+//   INVALID_DATA,
+//   NOTFOUND,
+//   DEFAULT,
+//   DUPLICATED,
+//   UNAUTHORIZED,
+// } = require("../utils/errors");
+
+const BadRequestError = require("../errorConstructors/BadRequestError");
+const NotFoundError = require("../errorConstructors/NotFoundError");
+const DefaultError = require("../errorConstructors/DefaultError");
+const DuplicatedError = require("../errorConstructors/DuplicatedError");
+const UnauthorizedError = require("../errorConstructors/UnauthorizedError");
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -28,13 +34,14 @@ const createUser = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        // res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        next(new BadRequestError("Validation error"));
       } else if (error.code === 11000) {
-        res.status(DUPLICATED.error).send({ message: DUPLICATED.status });
-      } else if (error.code === INVALID_DATA.error) {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        // res.status(DUPLICATED.error).send({ message: DUPLICATED.status });
+        next(new DuplicatedError("Email already in use"));
       } else {
-        res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        // res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        next(new DefaultError("Internal server error"));
       }
     });
 };
@@ -47,18 +54,20 @@ const login = (req, res, next) => {
     .select("+password")
     .then((userObject) => {
       if (!userObject) {
-        return res
-          .status(UNAUTHORIZED.error)
-          .send({ message: UNAUTHORIZED.status });
+        next(new UnauthorizedError("Incorrect passowrd or email"));
+        // return res
+        //   .status(UNAUTHORIZED.error)
+        //   .send({ message: UNAUTHORIZED.status });
       }
       return bcrypt
         .compare(password, userObject.password)
 
         .then((matchPassword) => {
           if (!matchPassword) {
-            return res
-              .status(UNAUTHORIZED.error)
-              .send({ message: UNAUTHORIZED.status });
+            next(new UnauthorizedError("Incorrect passowrd or email"));
+            // return res
+            //   .status(UNAUTHORIZED.error)
+            //   .send({ message: UNAUTHORIZED.status });
           }
           return res.send({
             token: jwt.sign(
@@ -71,7 +80,8 @@ const login = (req, res, next) => {
           });
         })
         .catch(() => {
-          res.status(UNAUTHORIZED.error).send({ message: UNAUTHORIZED.status });
+          // res.status(UNAUTHORIZED.error).send({ message: UNAUTHORIZED.status });
+          next(new UnauthorizedError("Incorrect passowrd or email"));
         });
     });
 };
@@ -83,16 +93,19 @@ const getCurrentUser = (req, res, next) => {
     .findById(req.user._id)
     .then((response) => {
       if (!response) {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+        next(new NotFoundError("You are not authorized"));
+        // res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
       } else {
         res.status(200).send({ response });
       }
     })
     .catch((e) => {
       if (e.name === "CastError") {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        // res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        next(new BadRequestError("Invalid Data"));
       } else {
-        res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        // res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        next(new DefaultError("Internal server error"));
       }
     });
 };
@@ -107,15 +120,18 @@ const updateProfile = (req, res, next) => {
     )
     .then((userObject) => {
       if (!userObject) {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+        // res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+        next(new NotFoundError("user not found"));
       }
       res.status(200).send(userObject);
     })
     .catch((e) => {
       if (e.name === "CastError" || e.name === "ValidationError") {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        next(new BadRequestError("Invalid Data"));
+        // res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else {
-        res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        // res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        next(new DefaultError("Internal server error"));
       }
     });
 };

@@ -5,12 +5,12 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 
 const app = express();
-
 const cors = require("cors");
+const { errors } = require("celebrate");
 
 app.use(cors());
-
 const { PORT = 3001 } = process.env;
+const errorHandler = require("./middlewares/error-handler"); // centralized error handler
 
 app.listen(PORT, () => console.log(`app listening in port: ${PORT}`));
 
@@ -22,12 +22,6 @@ const routes = require("./routes");
 app.use(express.json());
 app.use(cors());
 
-// temporary middleware
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: "5d8b8592978f8bd833ca8133", // paste the _id of the test user created in the previous step
-//   };
-//   next();
-// });
-
 app.use(routes);
+app.use(errors());
+app.use(errorHandler);

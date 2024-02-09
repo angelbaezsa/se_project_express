@@ -7,6 +7,11 @@ const {
   FORBIDDEN,
 } = require("../utils/errors");
 
+const BadRequestError = require("../errorConstructors/BadRequestError");
+const ForbiddenError = require("../errorConstructors/ForbiddenError");
+const NotFoundError = require("../errorConstructors/NotFoundError");
+const DefaultError = require("../errorConstructors/DefaultError");
+
 const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
@@ -18,9 +23,11 @@ const createItem = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        next(new BadRequestError("Invalid Data"));
+        // res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
       } else {
-        res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        // res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        next(error);
       }
     });
 };
@@ -32,9 +39,10 @@ const getItems = (req, res, next) => {
       // res.status(200).send(response);
       res.send({ response });
     })
-    .catch(() => {
+    .catch((error) => {
       // console.log(error);
-      res.status(DEFAULT.error).send({ message: DEFAULT.status });
+      // res.status(DEFAULT.error).send({ message: DEFAULT.status });
+      next(error);
     });
 };
 
@@ -45,20 +53,27 @@ const deleteItem = (req, res, next) => {
     .findOne({ _id: itemId })
     .then((response) => {
       if (!response) {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
-      } else if (String(response.owner) !== req.user._id) {
-        res.status(FORBIDDEN.error).send({ Message: FORBIDDEN.status });
-      } else {
-        clothingItems
-          .deleteOne({ _id: itemId })
-          .then((resp) => res.send({ resp }));
+        next(new NotFoundError("Item not found"));
+        return null;
       }
+      if (String(response.owner) !== req.user._id) {
+        // res.status(FORBIDDEN.error).send({ Message: FORBIDDEN.status });
+        next(new ForbiddenError("Not enough credentials to delete this item"));
+      }
+      return clothingItems
+        .deleteOne({ _id: itemId })
+        .then((resp) => res.send({ resp }))
+        .catch(() => {
+          next(new DefaultError("Internal server error"));
+        });
     })
     .catch((error) => {
       if (error.name === "CastError") {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        // res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        next(new BadRequestError("Invalid Data"));
       } else {
-        res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        // res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        next(new DefaultError("Internal server error"));
       }
     });
 };
@@ -76,14 +91,17 @@ const likeItem = (req, res, next) => {
       if (response !== null) {
         res.status(200).send({ data: response });
       } else {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+        // res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+        next(new NotFoundError("item not found"));
       }
     })
     .catch((error) => {
       if (error.name === "CastError") {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        // res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        next(new BadRequestError("Invalid Data"));
       } else {
-        res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        // res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        next(new DefaultError("Internal server error"));
       }
     });
 };
@@ -99,16 +117,19 @@ const disLikeItem = (req, res, next) => {
     )
     .then((item) => {
       if (!item) {
-        res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+        // res.status(NOTFOUND.error).send({ message: NOTFOUND.status });
+        next(new NotFoundError("item not found"));
       } else {
         res.status(200).send({ data: item });
       }
     })
     .catch((error) => {
       if (error.name === "CastError") {
-        res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        // res.status(INVALID_DATA.error).send({ message: INVALID_DATA.status });
+        next(new BadRequestError("Invalid Data"));
       } else {
-        res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        // res.status(DEFAULT.error).send({ message: DEFAULT.status });
+        next(new DefaultError("Internal server error"));
       }
     });
 };
