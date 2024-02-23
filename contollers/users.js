@@ -54,7 +54,7 @@ const login = (req, res, next) => {
     .select("+password")
     .then((userObject) => {
       if (!userObject) {
-        next(new UnauthorizedError("Incorrect passowrd or email"));
+        next(new UnauthorizedError("User doesn't exist"));
         // return res
         //   .status(UNAUTHORIZED.error)
         //   .send({ message: UNAUTHORIZED.status });
@@ -64,7 +64,7 @@ const login = (req, res, next) => {
 
         .then((matchPassword) => {
           if (!matchPassword) {
-            next(new UnauthorizedError("Incorrect passowrd or email"));
+            next(new UnauthorizedError("Incorrect password or email"));
             // return res
             //   .status(UNAUTHORIZED.error)
             //   .send({ message: UNAUTHORIZED.status });
@@ -81,7 +81,7 @@ const login = (req, res, next) => {
         })
         .catch(() => {
           // res.status(UNAUTHORIZED.error).send({ message: UNAUTHORIZED.status });
-          next(new UnauthorizedError("Incorrect passowrd or email"));
+          next(new UnauthorizedError("Incorrect password or email"));
         });
     });
 };
