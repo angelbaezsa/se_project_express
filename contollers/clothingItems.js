@@ -1,11 +1,5 @@
 const clothingItems = require("../models/clothingItems");
 const clothingItem = require("../models/clothingItems");
-const {
-  INVALID_DATA,
-  NOTFOUND,
-  DEFAULT,
-  FORBIDDEN,
-} = require("../utils/errors");
 
 const BadRequestError = require("../errorConstructors/BadRequestError");
 const ForbiddenError = require("../errorConstructors/ForbiddenError");
@@ -58,7 +52,9 @@ const deleteItem = (req, res, next) => {
       }
       if (String(response.owner) !== req.user._id) {
         // res.status(FORBIDDEN.error).send({ Message: FORBIDDEN.status });
-        next(new ForbiddenError("Not enough credentials to delete this item"));
+        return next(
+          new ForbiddenError("Not enough credentials to delete this item"),
+        );
       }
       return clothingItems
         .deleteOne({ _id: itemId })
